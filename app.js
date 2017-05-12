@@ -5,9 +5,8 @@ const appState = {
 //TEMPLATE
 function itemTemplate(state, item){
 	const shopClass = (item.checked ? "shopping-item__checked" : ""); 
-	const id = state.items.indexOf(item);
-	return `<li>
-        <span id=${id} class="shopping-item ${shopClass}">${item.name}</span>
+	return `<li id=${item.name}>
+        <span class="shopping-item ${shopClass}">${item.name}</span>
         <div class="shopping-item-controls">
           <button class="shopping-item-toggle">
             <span class="button-label">check</span>
@@ -23,22 +22,32 @@ function itemTemplate(state, item){
 
 //STATE MOD FUNCTIONS
 function addItem(state, itemName){
+	const objToAdd = {name: itemName, checked: false};
+	//console.log(state.items.length);
 	if(state.items.length === 0){
-		state.items.push({name: itemName, checked: false});
+		state.items.push(objToAdd);
+		//console.log("should add because its the first");
 	}
 	else{
-		if(state.items.indexOf(itemName) === -1){
-			state.items.push({name: itemName, checked: false});
+		console.log(state.items.find(item => item.name === itemName));
+		if(! state.items.find(item => item.name === itemName) ){
+			// state.items.find(item => item.name === itemName) == false
+			state.items.push(objToAdd);
+			//console.log("should add");
 		}
+		//console.log("shouldn't add");
 	}
 	console.log(state);
 }
 
 function checkItem(state, itemName){
 	if(state.items.length != 0){
-		(state.items.find(item => item.name === itemName).checked) = true;
+		let foundItem = state.items.find(item => item.name === itemName);
+		if(foundItem){ 
+			foundItem.checked = !foundItem.checked;
+		}
 	}
-	console.log(state);
+	//console.log(state);
 }
 
 function removeItem(state, itemName){
@@ -47,7 +56,7 @@ function removeItem(state, itemName){
 	if (index > -1){
 		state.items.splice(index, 1);
 	}
-	console.log(appState);
+	//console.log(appState);
 
 }
 
@@ -55,9 +64,9 @@ function removeItem(state, itemName){
 
 function renderList(state, element) {
     let itemsHTML = state.items.map(item => itemTemplate(state, item));
-    console.log(itemsHTML);
    
-    element.append(itemsHTML);
+    element.html(itemsHTML);
+    //console.log(itemsHTML);
     //console.log(element);
 };
 
@@ -66,19 +75,28 @@ function renderList(state, element) {
 
 function addListeners(){
 
-	$(".shopping-item-toggle").click(function(event){
+	$(".shopping-list").on('click', '.shopping-item-toggle' ,function(event){
 		event.preventDefault();
-		const clickedItem = $(this).closest('li').val();//.closest($('#shopping-item'));
-		console.log("closest item:" + clickedItem);
+		const clickedItem = $(this).closest($('li')).attr('id');
+		//console.log($(this).closest('li').attr('id'));
+		//console.log("closest item:" + clickedItem);
 		checkItem(appState, clickedItem);
 		renderList(appState, $('.shopping-list'));
-		//$(event.currentTarget.closest('li')).toggleClass("shopping-item__checked");
 	});
 
 	$("#js-shopping-list-form").submit(function(event){
 		event.preventDefault();
 		//console.log( $("#shopping-list-entry").val() );
 		addItem(appState, $('#shopping-list-entry').val());
+		renderList(appState, $('.shopping-list'));
+	});
+
+	$(".shopping-list").on('click', '.shopping-item-delete' ,function(event){
+		event.preventDefault();
+		const clickedItem = $(this).closest($('li')).attr('id');
+		//console.log($(this).closest('li').attr('id'));
+		//console.log("closest item:" + clickedItem);
+		removeItem(appState, clickedItem);
 		renderList(appState, $('.shopping-list'));
 	});
 
@@ -92,8 +110,7 @@ addListeners();
 });
 
 	
-	//do some listening stuff
-
+	
 
 
 
@@ -101,7 +118,6 @@ addListeners();
 //addItem(appState, "blue cheese");
 //addItem(appState, "ramen")
 //addItem(appState, "bratwurst");
-//console.log(appState);
 //checkItem(appState, "ramen");
 //removeItem(appState, "bananas");
 //renderList(appState, $('.shopping-list'));

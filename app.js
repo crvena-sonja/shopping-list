@@ -3,9 +3,11 @@ const appState = {
 };
 
 //TEMPLATE
-function itemTemplate(itemName){
+function itemTemplate(state, item){
+	const shopClass = (item.checked ? "shopping-item__checked" : ""); 
+	const id = state.items.indexOf(item);
 	return `<li>
-        <span class="shopping-item">${itemName}</span>
+        <span id=${id} class="shopping-item ${shopClass}">${item.name}</span>
         <div class="shopping-item-controls">
           <button class="shopping-item-toggle">
             <span class="button-label">check</span>
@@ -21,15 +23,22 @@ function itemTemplate(itemName){
 
 //STATE MOD FUNCTIONS
 function addItem(state, itemName){
-	state.items.push(
-	{	name: itemName,
-		checked: false});
+	if(state.items.length === 0){
+		state.items.push({name: itemName, checked: false});
+	}
+	else{
+		if(state.items.indexOf(itemName) === -1){
+			state.items.push({name: itemName, checked: false});
+		}
+	}
+	console.log(state);
 }
 
 function checkItem(state, itemName){
-	(state.items.find(item => item.name === itemName).checked) = true;
+	if(state.items.length != 0){
+		(state.items.find(item => item.name === itemName).checked) = true;
+	}
 	console.log(state);
-
 }
 
 function removeItem(state, itemName){
@@ -44,39 +53,58 @@ function removeItem(state, itemName){
 
 //RENDER FUNCTIONS
 
-function renderList(state, items) {
-    let itemsHTML = state.items.map(item => itemTemplate(item.name));
+function renderList(state, element) {
+    let itemsHTML = state.items.map(item => itemTemplate(state, item));
     console.log(itemsHTML);
-    //element.html(itemsHTML);
-    $(".shopping-list").append(itemsHTML);
-    console.log($(".shopping-list"));
+   
+    element.append(itemsHTML);
+    //console.log(element);
 };
+
+
+//EVENT LISTENERS
+
+function addListeners(){
+
+	$(".shopping-item-toggle").click(function(event){
+		event.preventDefault();
+		const clickedItem = $(this).closest('li').val();//.closest($('#shopping-item'));
+		console.log("closest item:" + clickedItem);
+		checkItem(appState, clickedItem);
+		renderList(appState, $('.shopping-list'));
+		//$(event.currentTarget.closest('li')).toggleClass("shopping-item__checked");
+	});
+
+	$("#js-shopping-list-form").submit(function(event){
+		event.preventDefault();
+		//console.log( $("#shopping-list-entry").val() );
+		addItem(appState, $('#shopping-list-entry').val());
+		renderList(appState, $('.shopping-list'));
+	});
+
+}
 
 
 $(function () {
 
-
-$(".shopping-item-controls").click(function(event){
-	$(event.currentTarget.closest('li')).toggleClass("shopping-item__checked");
-});
+addListeners();
 
 });
-//EVENT LISTENERS
 
-function addListeners(){
+	
 	//do some listening stuff
-}
+
 
 
 
 //TESTING FUNCTION CALLS
-addItem(appState, "milk");
-addItem(appState, "oranges")
-addItem(appState, "bananas");
-console.log(appState);
-checkItem(appState, "bananas");
-removeItem(appState, "bananas");
-renderList(appState, appState.items);
+//addItem(appState, "blue cheese");
+//addItem(appState, "ramen")
+//addItem(appState, "bratwurst");
+//console.log(appState);
+//checkItem(appState, "ramen");
+//removeItem(appState, "bananas");
+//renderList(appState, $('.shopping-list'));
 //console.log(appState);
 
 //console.log("Helloooooo");
